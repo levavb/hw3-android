@@ -1,46 +1,93 @@
 package com.example.triviaapp;
 
 
-public class Questions {
-    public Question[] questions = new Question[10];
+import android.os.AsyncTask;
+import android.util.Log;
 
-//    public Questions(Question[] questions) {
-//        this.questions = questions;
-//    }
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    public Questions() {
-        questions[0] = new Question("Who was the first President of the United States?",
-                new String[]{"John Adams", "George Washington", "Andrew Jackson", "Thomas Jefferson"},
-                "George Washington");
-        questions[1] = new Question("How many colonies were the United States originally?",
-                new String[]{"11", "12", "13", "14"},
-                "13");
-        questions[2] = new Question(" What war was fought on American soil from 1861 to 1865?",
-                new String[]{"War of 1812", "World War I", "The Revolutionary War", "The American Civil War"},
-                "The American Civil War");
-        questions[3] = new Question("Who was the 16th president of the US?",
-                new String[]{"Abraham Lincoln", "Ulysses S. Grant", "James Buchanan", "Andrew Johnson"},
-                "Abraham Lincoln");
-        questions[4] = new Question("Who was the only president to serve two separate terms in office?",
-                new String[]{"Benjamin Harrison", "William McKinley", "Grover Cleveland", "Chester A. Arthur"},
-                "Grover Cleveland");
-        questions[5] = new Question("Today in the United States government there are two major political parties.  The Republicans are one of the parties who is the other party?",
-                new String[]{"The Independents", "The Progressives", "The Federalists", "The Democrats"},
-                "The Democrats");
-        questions[6] = new Question("How many judges are there in the United States Supreme Court?",
-                new String[]{"5", "7", "9", "11"},
-                "9");
-        questions[7] = new Question("Who was the president from 1933 to 1945,  the only president to serve more than 8 years in office?",
-                new String[]{"Harry Truman", "Franklin D. Roosevelt", "Herbert Hoover", "Dwight Eisenhower"},
-                "Franklin D. Roosevelt");
-        questions[8] = new Question("Who was the president from 1933 to 1945,  the only president to serve more than 8 years in office?",
-                new String[]{"50", "100", "150", "200"},
-                "100");
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Random;
 
+public class Questions extends AsyncTask<Void,Void,Void> {
+    public Question[] questions;
+    int quesNum;
+
+    public Questions(int ques_num) {
+        super();
+        quesNum = ques_num;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
     }
 
     public Question getQuestion(int index) {
         return questions[index];
     }
 
+    @Override
+    protected Void doInBackground(Void... voids) {
+        questions = new Question[quesNum];
+        String strUrl = "https://opentdb.com/api.php?amount="+String.valueOf(quesNum)+"&type=multiple";
+        try {
+            URL url = new URL(strUrl);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            InputStream inputStream = httpURLConnection.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = "";
+            String data = "";
+            while(line != null){
+                line = bufferedReader.readLine();
+                data = data + line;
+            }
+            JSONObject jsonObj = new JSONObject(data);
+            JSONArray JA = jsonObj.getJSONArray("results");
+            String[] AllAnswerArr = new String[4];
+            int randInd,internalInd;
+            Random random = new Random();
+            for(int i =0 ;i <JA.length(); i++){
+                JSONObject JO = (JSONObject) JA.get(i);
+                JSONArray arrJson = JO.getJSONArray("incorrect_answers");
+                String[] ArrAnswer = new String[arrJson.length()];
+                for(int j = 0; j < arrJson.length(); j++) {
+                    ArrAnswer[j] = arrJson.getString(j);
+                }
+                String CorrAnswer = (String) JO.get("correct_answer");
+
+                randInd = random.nextInt(4);
+                internalInd = 0;
+                for(int id=0; id < 4 ; id++) {
+
+                    if(randInd == id) {
+                        AllAnswerArr[id] = CorrAnswer;
+                    } else {
+                        AllAnswerArr[id] = ArrAnswer[internalInd++];
+                    }
+                }
+                questions[i] = new Question((String) JO.get("question"),
+                        new String[]{AllAnswerArr[0], AllAnswerArr[1], AllAnswerArr[2], AllAnswerArr[3]},
+                        CorrAnswer);
+
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
