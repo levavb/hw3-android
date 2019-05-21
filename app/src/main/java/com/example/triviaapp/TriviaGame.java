@@ -29,6 +29,9 @@ public class TriviaGame extends AppCompatActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trivia_game);
+
+        MediaPlayer myMusic = MediaPlayer.create(TriviaGame.this,R.raw.music);
+        myMusic.start();
         Intent intent = getIntent();
         NumOfQues = intent.getIntExtra("quesNum",10);
         userN = intent.getStringExtra("userName");
