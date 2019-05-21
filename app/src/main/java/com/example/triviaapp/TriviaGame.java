@@ -3,6 +3,7 @@ package com.example.triviaapp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,7 +29,6 @@ public class TriviaGame extends AppCompatActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trivia_game);
-
         Intent intent = getIntent();
         NumOfQues = intent.getIntExtra("quesNum",10);
         userN = intent.getStringExtra("userName");
