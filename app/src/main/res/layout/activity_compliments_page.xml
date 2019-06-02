@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
+        android:textColor="#0000ff"
         android:text="Good Job!!!!!!"
         android:textSize="30dp"
         android:gravity="center"
